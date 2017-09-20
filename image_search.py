@@ -10,7 +10,7 @@ config = configparser.ConfigParser()
 config.read('./config.ini')
 search_url = 'https://www.googleapis.com/customsearch/v1?key={key}&cx={cx}&q={q}&num={num}&start={start}&searchType=image'
 
-# search_word で検索した結果の画像のURLを返す:w
+# search_word で検索した結果の画像のURLを返す
 # 10枚 * n回実行
 def get_image_urls(search_word, repeat_num):
     urls = []
