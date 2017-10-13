@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import configparser
 from urllib.parse import quote_plus
-import urllib.request
 import json
 import sys
 import os
+import hashlib
+import requests
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -26,8 +27,8 @@ def get_image_urls(search_word, repeat_num):
         )
         print(url)
 
-        res = urllib.request.urlopen(url)
-        data = json.loads(res.read().decode('utf-8'))
+        res = requests.get(url)
+        data = json.loads(res.content.decode('utf-8'))
 
         for j in range(len(data["items"])):
             urls.append(data["items"][j]["link"])
@@ -42,10 +43,15 @@ def download_image(base, urls):
     for i in range(len(urls)):
         try:
             print(urls[i])
-            file_name, ext = os.path.splitext(urls[i])
-            urllib.request.urlretrieve(urls[i], output_dir + "/" + base + str(i) + ext)
+            ext = os.path.splitext(urls[i])[1].split("?%&")[0]
+            image = requests.get(urls[i]).content # download
+            file_name = output_dir + "/" + hashlib.md5(image).hexdigest() + ext; # md5 hash
+            print("save as " + file_name);
+            with open(file_name, "wb") as fout:
+                fout.write(image)
+
         except:
-            print("failed to download image: " + urls[i])
+            print("failed to download image")
             continue
 
 
@@ -56,4 +62,5 @@ if __name__ == '__main__':
         quit()
 
     urls = get_image_urls(argvs[1], int(argvs[2]))
+    print("---- Get URL ---- ")
     download_image(argvs[3], urls)
